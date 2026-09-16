@@ -1,0 +1,136 @@
+@import "tailwindcss";
+
+:root {
+  /* Palette 1: "The Hermetic Sanctuary" (Default Dark Nocturnal Ground) */
+  --bg-canvas: #0B0B0E;
+  --bg-surface: #14141B;
+  --bg-elevated: #1D1D27;
+  
+  --gold-primary: #D4AF37;
+  --gold-muted: #9E8030;
+  --gold-light: #F5E5A4;
+  
+  --text-primary: #F4EFE6;
+  --text-muted: #9E9EB2;
+  --text-dim: #68687D;
+  
+  --border-subtle: rgba(212, 175, 55, 0.18);
+  --border-glow: rgba(212, 175, 55, 0.38);
+
+  /* Minor Arcana Elemental Suit Accents */
+  --suit-wands: #E26D5C;
+  --suit-cups: #3A86C8;
+  --suit-swords: #A2D2FF;
+  --suit-pentacles: #588157;
+}
+
+@theme inline {
+  --color-canvas: var(--bg-canvas);
+  --color-surface: var(--bg-surface);
+  --color-elevated: var(--bg-elevated);
+
+  --color-gold: var(--gold-primary);
+  --color-gold-muted: var(--gold-muted);
+  --color-gold-light: var(--gold-light);
+
+  --color-bone: var(--text-primary);
+  --color-silver: var(--text-muted);
+
+  --font-serif-heading: var(--font-cinzel), Georgia, serif;
+  --font-serif-display: var(--font-cormorant), Georgia, serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+}
+
+body {
+  background-color: var(--bg-canvas);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* 3D Perspective Card Scene */
+.card-scene {
+  perspective: 1200px;
+}
+
+.card-flipper {
+  transform-style: preserve-3d;
+  transition: transform 0.85s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s ease;
+  will-change: transform;
+}
+
+.card-flipper.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.card-flipper.is-reversed {
+  transform: rotateY(180deg) rotateZ(180deg);
+}
+
+.card-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  overflow: hidden;
+  border-radius: 0.75rem;
+}
+
+.card-face-back {
+  background: radial-gradient(circle at center, #1b1a29 0%, #0c0b14 100%);
+  border: 1.5px solid rgba(212, 175, 55, 0.35);
+}
+
+.card-face-front {
+  transform: rotateY(180deg);
+  background: #0f1017;
+  border: 1.5px solid var(--gold-primary);
+}
+
+/* Frosted Alchemical Glassmorphism */
+.scrying-glass {
+  background: rgba(20, 20, 27, 0.78);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid var(--border-subtle);
+  box-shadow: 
+    0 10px 32px 0 rgba(0, 0, 0, 0.6),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -1px 1px 0 rgba(212, 175, 55, 0.12);
+}
+
+/* Subtle Gold Shimmer Border */
+.gold-foil-border {
+  position: relative;
+  background: linear-gradient(
+    135deg,
+    #9e8030 0%,
+    #f5e5a4 25%,
+    #d4af37 50%,
+    #6d551c 75%,
+    #e5c07b 100%
+  );
+  padding: 1px;
+}
+
+/* Reduced Motion Safety */
+@media (prefers-reduced-motion: reduce) {
+  .card-scene {
+    perspective: none !important;
+  }
+  .card-flipper {
+    transition: opacity 0.3s ease !important;
+    transform: none !important;
+  }
+  .card-flipper.is-flipped .card-face-back,
+  .card-flipper.is-reversed .card-face-back {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .card-flipper.is-flipped .card-face-front,
+  .card-flipper.is-reversed .card-face-front {
+    opacity: 1;
+    transform: none !important;
+  }
+}

@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  /* Palette 1: "The Hermetic Sanctuary" (Default Dark Nocturnal Ground) */
+  /* Default: Palette 1 "The Hermetic Sanctuary" (Dark Nocturnal Ground) */
   --bg-canvas: #0B0B0E;
   --bg-surface: #14141B;
   --bg-elevated: #1D1D27;
@@ -16,8 +16,64 @@
   
   --border-subtle: rgba(212, 175, 55, 0.18);
   --border-glow: rgba(212, 175, 55, 0.38);
+}
 
-  /* Minor Arcana Elemental Suit Accents */
+:root[data-theme="astral-veil"] {
+  /* Palette 2: "The Astral Veil" (Deep purples, silvers) */
+  --bg-canvas: #0c0814;
+  --bg-surface: #171124;
+  --bg-elevated: #241a3a;
+  
+  --gold-primary: #a3c2e6; /* Silver/Lunar Blue */
+  --gold-muted: #6283ad;
+  --gold-light: #e6f0fa;
+  
+  --text-primary: #e6e0f8;
+  --text-muted: #9b90bd;
+  --text-dim: #605580;
+  
+  --border-subtle: rgba(163, 194, 230, 0.18);
+  --border-glow: rgba(163, 194, 230, 0.38);
+}
+
+:root[data-theme="herbalist-grove"] {
+  /* Palette 3: "The Herbalist's Grove" (Earthy greens, muted sunlight) */
+  --bg-canvas: #0c120c;
+  --bg-surface: #141f14;
+  --bg-elevated: #1e301e;
+  
+  --gold-primary: #d6b87c; /* Pale sunlight */
+  --gold-muted: #8c764b;
+  --gold-light: #f7e8c3;
+  
+  --text-primary: #e8ecd8;
+  --text-muted: #99a888;
+  --text-dim: #5c6b50;
+  
+  --border-subtle: rgba(214, 184, 124, 0.18);
+  --border-glow: rgba(214, 184, 124, 0.38);
+}
+
+:root[data-theme="ancient-grimoire"] {
+  /* Palette 4: "The Ancient Grimoire" (Light mode, parchment, high contrast ink) */
+  --bg-canvas: #f4efe6;
+  --bg-surface: #e8dfcd;
+  --bg-elevated: #d6cbb3;
+  
+  --gold-primary: #8b1e10; /* Cinnabar Red ink */
+  --gold-muted: #5e140b;
+  --gold-light: #bd3422;
+  
+  --text-primary: #1a1614; /* Sepia/Iron Gall ink */
+  --text-muted: #4a413c;
+  --text-dim: #857971;
+  
+  --border-subtle: rgba(139, 30, 16, 0.18);
+  --border-glow: rgba(139, 30, 16, 0.38);
+}
+
+:root {
+  /* Minor Arcana Elemental Suit Accents (Universal) */
   --suit-wands: #E26D5C;
   --suit-cups: #3A86C8;
   --suit-swords: #A2D2FF;

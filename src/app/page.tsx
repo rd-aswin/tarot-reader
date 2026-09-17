@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { SacredAudioEngine } from "@/lib/audio/soundEngine";
-import { MAJOR_ARCANA, SPREADS } from "@/lib/tarot/deck";
+import { FULL_DECK, SPREADS } from "@/lib/tarot/deck";
 import { shuffleDeck, isCardReversed } from "@/lib/tarot/shuffle";
 import { TarotCard, SpreadDefinition } from "@/lib/tarot/types";
 import { db } from "@/lib/db";
@@ -12,9 +13,10 @@ import {
   VolumeX, 
   RotateCcw, 
   ShieldAlert, 
-  Compass, 
-  Check, 
-  Feather
+  Moon, 
+  Feather,
+  Compass,
+  Check
 } from "lucide-react";
 
 interface DrawnCardState {
@@ -54,7 +56,7 @@ export default function SanctuaryHomePage() {
   const [userQuery, setUserQuery] = useState<string>("");
   
   // Crisis Keywords Interceptor (Derived state)
-  const crisisPatterns = /\b(suicide|kill myself|end my life|self harm|overdose|want to die)\b/i;
+  const crisisPatterns = /\b(suicide|kill myself|die|medical|cancer|pregnant|invest|stocks|bitcoin|lawsuit|sue|legal)\b/i;
   const crisisDetected = crisisPatterns.test(userQuery);
   
   // Audio state
@@ -62,8 +64,37 @@ export default function SanctuaryHomePage() {
   
   // Card dealing & reading state
   const [isShuffling, setIsShuffling] = useState<boolean>(false);
+  const [isFanning, setIsFanning] = useState<boolean>(false);
+  const [fannedDeck, setFannedDeck] = useState<TarotCard[]>([]);
   const [cardsDealt, setCardsDealt] = useState<boolean>(false);
   const [drawnCards, setDrawnCards] = useState<DrawnCardState[]>([]);
+  const [jumperCard, setJumperCard] = useState<DrawnCardState | null>(null);
+  
+  // AI Synthesis State
+  const [aiSynthesis, setAiSynthesis] = useState<string | null>(null);
+  const [isAiSynthesizing, setIsAiSynthesizing] = useState<boolean>(false);
+
+  // Trigger AI Synthesis when all cards are flipped
+  useEffect(() => {
+    const checkSynthesis = async () => {
+      if (cardsDealt && drawnCards.length > 0 && drawnCards.every((c) => c.isFlipped) && !aiSynthesis && !isAiSynthesizing) {
+        setIsAiSynthesizing(true);
+        const { synthesizeReading } = await import("./actions");
+        
+        const mappedCards = drawnCards.map(c => ({
+          name: c.card.name,
+          position: c.positionTitle,
+          isReversed: c.isReversed,
+          summary: c.isReversed ? c.card.summary.reversed : c.card.summary.upright
+        }));
+        
+        const synthesis = await synthesizeReading(userQuery, mappedCards);
+        setAiSynthesis(synthesis);
+        setIsAiSynthesizing(false);
+      }
+    };
+    checkSynthesis();
+  }, [drawnCards, cardsDealt, userQuery, aiSynthesis, isAiSynthesizing]);
   
   // Journaling state
   const [reflectionNotes, setReflectionNotes] = useState<string>("");
@@ -90,8 +121,26 @@ export default function SanctuaryHomePage() {
   };
 
   // Deck Shuffling & Deal
-  const handleStartReading = () => {
+  const [aiValidationMessage, setAiValidationMessage] = useState<string | null>(null);
+  const [isAiValidating, setIsAiValidating] = useState(false);
+
+  const handleStartReading = async () => {
     if (!ageConfirmed || crisisDetected) return;
+
+    if (userQuery) {
+      setIsAiValidating(true);
+      setAiValidationMessage(null);
+      
+      const { validateIntakeQuestion } = await import("./actions");
+      const validation = await validateIntakeQuestion(userQuery);
+      
+      setIsAiValidating(false);
+      
+      if (!validation.valid) {
+        setAiValidationMessage(validation.message || "Please rephrase your question.");
+        return;
+      }
+    }
 
     if (audioEngine) {
       audioEngine.playCardSlide();
@@ -99,22 +148,61 @@ export default function SanctuaryHomePage() {
     setIsShuffling(true);
 
     setTimeout(() => {
-      const shuffled = shuffleDeck(MAJOR_ARCANA);
-      const dealt: DrawnCardState[] = selectedSpread.positions.map((pos, idx) => ({
-        card: shuffled[idx],
-        isReversed: isCardReversed(0.25),
-        isFlipped: false,
-        positionTitle: pos.title,
-        positionDesc: pos.description,
-      }));
-
-      setDrawnCards(dealt);
+      const shuffled = shuffleDeck(FULL_DECK);
+      setFannedDeck(shuffled);
       setIsShuffling(false);
-      setCardsDealt(true);
-      if (audioEngine) {
-        audioEngine.playSingingBowl(528);
+      setIsFanning(true);
+      
+      // We no longer automatically populate drawnCards here.
+      // They will be picked one by one in handleSelectCardFromFan
+      
+      // 2.5% chance for a Jumper Card
+      if (Math.random() < 0.025) {
+        setJumperCard({
+          card: shuffled[selectedSpread.positions.length],
+          isReversed: isCardReversed(0.25),
+          isFlipped: true, // Jumpers fall face up
+          positionTitle: "The Jumper",
+          positionDesc: "A card that leapt from the deck while shuffling, insisting on being seen. A spontaneous, urgent message from the subconscious.",
+        });
+      } else {
+        setJumperCard(null);
       }
-    }, 1200);
+    }, 3000);
+  };
+
+  const handleSelectCardFromFan = (card: TarotCard) => {
+    // Only allow selecting up to the spread size
+    if (drawnCards.length >= selectedSpread.positions.length) return;
+
+    if (audioEngine) {
+      audioEngine.playCardSlide();
+    }
+
+    const positionIndex = drawnCards.length;
+    const pos = selectedSpread.positions[positionIndex];
+
+    const newDrawnCard: DrawnCardState = {
+      card,
+      isReversed: isCardReversed(0.25),
+      isFlipped: false,
+      positionTitle: pos.title,
+      positionDesc: pos.description,
+    };
+
+    const newDrawnCards = [...drawnCards, newDrawnCard];
+    setDrawnCards(newDrawnCards);
+
+    // Remove the picked card from the fan so it disappears
+    setFannedDeck(prev => prev.filter(c => c.id !== card.id));
+
+    // If we picked the last card required for the spread
+    if (newDrawnCards.length === selectedSpread.positions.length) {
+      setIsFanning(false);
+      setTimeout(() => {
+        setCardsDealt(true);
+      }, 500);
+    }
   };
 
   // Card Flip Handler
@@ -131,7 +219,7 @@ export default function SanctuaryHomePage() {
     );
   };
 
-  // Save to Zero-Knowledge IndexedDB Journal
+  // Save reading to local journal
   const handleSaveReflection = async () => {
     try {
       const cardEntries = drawnCards.map((c) => ({
@@ -188,6 +276,13 @@ export default function SanctuaryHomePage() {
 
         {hasBegun && (
           <div className="flex items-center gap-3">
+            <Link 
+              href="/journal"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[rgba(212,175,55,0.2)] hover:border-[#D4AF37]/50 bg-[#14141B] text-xs text-[#9E9EB2] hover:text-[#F4EFE6] transition-colors"
+            >
+              <Feather className="w-3.5 h-3.5" />
+              <span>Journal</span>
+            </Link>
             <button
               onClick={handleToggleAudio}
               className="p-2 rounded-lg border border-[rgba(212,175,55,0.2)] hover:border-[#D4AF37]/50 bg-[#14141B] text-[#9E9EB2] hover:text-[#F4EFE6] transition-colors"
@@ -231,7 +326,7 @@ export default function SanctuaryHomePage() {
               BEGIN THE CEREMONY
             </button>
             <span className="text-[11px] text-[#68687D]">
-              Audio enabled upon entry • 432Hz ambient resonance
+              Audio enabled upon entry
             </span>
           </div>
         </div>
@@ -259,7 +354,7 @@ export default function SanctuaryHomePage() {
           )}
 
           {/* Intention Formulation & Setup (Before Deal) */}
-          {!cardsDealt && (
+          {!cardsDealt && !isFanning && (
             <div className="w-full max-w-2xl space-y-6 scrying-glass p-6 md:p-8 rounded-2xl">
               {/* Question Framing Input */}
               <div className="space-y-2">
@@ -269,10 +364,22 @@ export default function SanctuaryHomePage() {
                 <input
                   type="text"
                   value={userQuery}
-                  onChange={(e) => setUserQuery(e.target.value)}
+                  onChange={(e) => {
+                    setUserQuery(e.target.value);
+                    setAiValidationMessage(null);
+                  }}
                   placeholder="e.g., What internal attitudes are shaping my career crossroads?"
                   className="w-full px-4 py-3 rounded-xl bg-[#0B0B0E] border border-[rgba(212,175,55,0.25)] focus:border-[#D4AF37] focus:outline-none text-[#F4EFE6] placeholder-[#68687D] text-sm"
                 />
+                {isAiValidating && (
+                  <p className="text-xs text-[#D4AF37] animate-pulse">The AI is gently reflecting on your question...</p>
+                )}
+                {aiValidationMessage && (
+                  <div className="p-3 rounded-lg border border-orange-500/30 bg-orange-950/40 text-orange-200 text-xs leading-relaxed animate-in fade-in">
+                    <span className="font-semibold block mb-1">Gentle Guidance:</span>
+                    {aiValidationMessage}
+                  </div>
+                )}
                 <p className="text-[11px] text-[#9E9EB2]">
                   Frame questions around internal personal agency rather than external fortune-telling.
                 </p>
@@ -322,17 +429,70 @@ export default function SanctuaryHomePage() {
 
               {/* Deal Initiation Button */}
               <div className="pt-2 flex justify-center">
-                <button
-                  disabled={!ageConfirmed || isShuffling || crisisDetected}
-                  onClick={handleStartReading}
-                  className={`w-full py-3.5 rounded-xl text-xs uppercase tracking-[0.2em] font-semibold font-[family-name:var(--font-cinzel)] transition-all ${
-                    ageConfirmed && !crisisDetected
-                      ? "bg-gradient-to-r from-[#D4AF37] via-[#F5E5A4] to-[#D4AF37] text-[#0B0B0E] hover:brightness-110 shadow-lg shadow-[#D4AF37]/10 cursor-pointer"
-                      : "bg-[#1D1D27] text-[#68687D] cursor-not-allowed border border-[#68687D]/20"
-                  }`}
-                >
-                  {isShuffling ? "CONSECRATING THE CARDS..." : "SHUFFLE & DEAL SPREAD"}
-                </button>
+                {isShuffling ? (
+                  <div className="w-full flex flex-col items-center justify-center py-6 space-y-4">
+                    <div className="relative flex items-center justify-center w-16 h-16">
+                      <div className="absolute w-full h-full border border-[#D4AF37]/40 rounded-full animate-[ping_3s_ease-in-out_infinite]" />
+                      <div className="absolute w-8 h-8 bg-[#D4AF37]/20 rounded-full animate-pulse" />
+                      <Sparkles className="w-4 h-4 text-[#D4AF37] animate-pulse" />
+                    </div>
+                    <span className="text-[10px] text-[#9E9EB2] tracking-[0.2em] uppercase font-[family-name:var(--font-cinzel)] animate-pulse">
+                      Breathe. Center your mind.
+                    </span>
+                  </div>
+                ) : (
+                  <button
+                    disabled={!ageConfirmed || crisisDetected}
+                    onClick={handleStartReading}
+                    className={`w-full py-3.5 rounded-xl text-xs uppercase tracking-[0.2em] font-semibold font-[family-name:var(--font-cinzel)] transition-all ${
+                      ageConfirmed && !crisisDetected
+                        ? "bg-gradient-to-r from-[#D4AF37] via-[#F5E5A4] to-[#D4AF37] text-[#0B0B0E] hover:brightness-110 shadow-lg shadow-[#D4AF37]/10 cursor-pointer"
+                        : "bg-[#1D1D27] text-[#68687D] cursor-not-allowed border border-[#68687D]/20"
+                    }`}
+                  >
+                    SHUFFLE & DEAL SPREAD
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Interactive Deck Fanning UI */}
+          {isFanning && (
+            <div className="w-full h-[60vh] flex flex-col items-center justify-center space-y-8 animate-in fade-in duration-1000">
+              <div className="text-center space-y-2">
+                <h3 className="text-xl text-[var(--gold-primary)] font-[family-name:var(--font-cinzel)] uppercase tracking-widest">
+                  Draw Your Cards
+                </h3>
+                <p className="text-sm text-[var(--text-muted)]">
+                  Select {selectedSpread.positions.length - drawnCards.length} more card{selectedSpread.positions.length - drawnCards.length !== 1 ? 's' : ''} for the {selectedSpread.name}.
+                </p>
+              </div>
+
+              {/* The Fan */}
+              <div className="relative w-full max-w-4xl h-64 flex items-center justify-center overflow-x-hidden pt-12">
+                {fannedDeck.map((card, idx) => {
+                  // Calculate polar arc rotation based on index out of remaining cards
+                  const total = fannedDeck.length;
+                  const middle = total / 2;
+                  const offset = idx - middle;
+                  const rotation = offset * 1.5; // Spread out by 1.5 degrees each
+                  const yOffset = Math.abs(offset) * 1.2; // Curve downwards at the edges
+
+                  return (
+                    <div
+                      key={card.id}
+                      onClick={() => handleSelectCardFromFan(card)}
+                      className="absolute w-24 aspect-[2/3] rounded-xl cursor-pointer hover:-translate-y-8 hover:z-[100] transition-all duration-300 card-flipper"
+                      style={{
+                        transform: `rotate(${rotation}deg) translateY(${yOffset}px)`,
+                        zIndex: idx,
+                      }}
+                    >
+                      <div className="card-face card-face-back w-full h-full shadow-xl" />
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -352,8 +512,35 @@ export default function SanctuaryHomePage() {
                 </div>
               )}
 
+              {/* Jumper Card Display */}
+              {jumperCard && (
+                <div className="w-full max-w-xl mx-auto mb-10 p-6 rounded-2xl bg-[#0B0B0E]/60 border border-[#D4AF37]/20 flex flex-col md:flex-row items-center gap-6 animate-in slide-in-from-top-4 duration-700 shadow-[0_0_30px_rgba(212,175,55,0.05)]">
+                  <div className="w-[100px] shrink-0">
+                    <img
+                      src={`/cards/${jumperCard.card.imageFile}`} 
+                      alt={jumperCard.card.name} 
+                      className={`w-full rounded-md shadow-lg ${jumperCard.isReversed ? 'rotate-180' : ''}`}
+                    />
+                  </div>
+                  <div className="text-center md:text-left space-y-2">
+                    <span className="text-[11px] text-orange-300 uppercase tracking-widest font-semibold font-[family-name:var(--font-cinzel)] animate-pulse">
+                      A Card Has Jumped
+                    </span>
+                    <h3 className="text-lg font-semibold text-[#F4EFE6] font-[family-name:var(--font-cinzel)]">
+                      {jumperCard.card.name} {jumperCard.isReversed && "(Reversed)"}
+                    </h3>
+                    <p className="text-xs text-[#9E9EB2] italic">
+                      {jumperCard.positionDesc}
+                    </p>
+                    <p className="text-xs text-[#D4AF37]/80 pt-2 border-t border-[rgba(212,175,55,0.15)]">
+                      {jumperCard.isReversed ? jumperCard.card.summary.reversed : jumperCard.card.summary.upright}
+                    </p>
+                  </div>
+                </div>
+              )}
+
               {/* 3D Card Dealing Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 justify-items-center">
+              <div className="flex flex-wrap justify-center gap-8">
                 {drawnCards.map((item, idx) => (
                   <div key={idx} className="flex flex-col items-center space-y-3 w-full max-w-[240px]">
                     <div className="text-center space-y-0.5">
@@ -400,10 +587,20 @@ export default function SanctuaryHomePage() {
                             </span>
                           </div>
 
-                          <div className="my-auto py-4 text-center">
-                            <div className="w-16 h-16 mx-auto mb-3 rounded-full border border-[#D4AF37]/40 flex items-center justify-center bg-[#14141B]">
-                              <Sparkles className="w-8 h-8 text-[#D4AF37]" />
-                            </div>
+                          <div className="my-auto py-2 text-center w-full flex flex-col items-center justify-center relative flex-1">
+                            {item.card.imageFile ? (
+                              <div className="relative w-[120px] h-[200px] mb-2 shadow-lg shadow-black/50 overflow-hidden rounded-md border border-[#D4AF37]/20 mx-auto">
+                                <img
+                                  src={`/cards/${item.card.imageFile}`} 
+                                  alt={item.card.name} 
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                            ) : (
+                              <div className="w-16 h-16 mx-auto mb-3 rounded-full border border-[#D4AF37]/40 flex items-center justify-center bg-[#14141B]">
+                                <Sparkles className="w-8 h-8 text-[#D4AF37]" />
+                              </div>
+                            )}
                             <h3 className="text-base font-semibold text-[#F4EFE6] font-[family-name:var(--font-cinzel)]">
                               {item.card.name}
                             </h3>
@@ -433,9 +630,29 @@ export default function SanctuaryHomePage() {
                 ))}
               </div>
 
-              {/* STAGE 3: Synthesis & Zero-Knowledge Journaling */}
+              {/* STAGE 3: Synthesis & Journaling */}
               {drawnCards.every((c) => c.isFlipped) && (
                 <div className="w-full max-w-2xl mx-auto scrying-glass p-6 md:p-8 rounded-2xl space-y-6 animate-in fade-in duration-1000">
+                  
+                  {/* AI Synthesis */}
+                  <div className="space-y-2 pb-6 border-b border-[rgba(212,175,55,0.15)]">
+                    <div className="flex items-center gap-2 text-[#D4AF37]">
+                      <Sparkles className="w-4 h-4" />
+                      <h3 className="text-sm font-semibold tracking-wider font-[family-name:var(--font-cinzel)] uppercase">
+                        The Scrying Glass
+                      </h3>
+                    </div>
+                    {isAiSynthesizing ? (
+                      <p className="text-xs md:text-sm text-[#D4AF37] leading-relaxed italic animate-pulse">
+                        The sanctuary is gathering the threads of your reading...
+                      </p>
+                    ) : aiSynthesis ? (
+                      <div className="text-xs md:text-sm text-[#F4EFE6] leading-relaxed whitespace-pre-wrap">
+                        {aiSynthesis}
+                      </div>
+                    ) : null}
+                  </div>
+
                   <div className="flex items-center gap-2 text-[#D4AF37]">
                     <Feather className="w-5 h-5" />
                     <h3 className="text-base font-semibold tracking-wider font-[family-name:var(--font-cinzel)]">
@@ -450,14 +667,14 @@ export default function SanctuaryHomePage() {
                     rows={4}
                     value={reflectionNotes}
                     onChange={(e) => setReflectionNotes(e.target.value)}
-                    placeholder="Write your contemplative notes here. Stored privately on your device via Zero-Knowledge client-side storage..."
+                    placeholder="Write your contemplative notes here. Your reflections remain entirely private and are kept only on this device..."
                     className="w-full p-4 rounded-xl bg-[#0B0B0E] border border-[rgba(212,175,55,0.25)] focus:border-[#D4AF37] focus:outline-none text-sm text-[#F4EFE6] placeholder-[#68687D]"
                   />
 
                   <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
-                    <span className="text-[11px] text-[#68687D]">
-                      🔒 Encrypted locally in your browser (IndexedDB). Zero server transmission.
-                    </span>
+                      <span className="text-[11px] text-[var(--text-dim)]">
+                        🔒 Your reflections are completely private and saved only to your device.
+                      </span>
                     <button
                       onClick={handleSaveReflection}
                       className="px-6 py-2.5 rounded-xl text-xs font-semibold tracking-wider text-[#0B0B0E] bg-gradient-to-r from-[#D4AF37] to-[#F5E5A4] hover:brightness-110 transition-all font-[family-name:var(--font-cinzel)] cursor-pointer flex items-center gap-2"
@@ -478,6 +695,11 @@ export default function SanctuaryHomePage() {
           )}
         </div>
       )}
+      {/* Screen Reader Live Region for Accessibility */}
+      <div aria-live="polite" className="sr-only">
+        {isShuffling ? "Shuffling the deck and preparing your reading..." : ""}
+        {cardsDealt ? `Spread dealt. ${drawnCards.filter(c => c.isFlipped).length} out of ${drawnCards.length} cards revealed.` : ""}
+      </div>
     </div>
   );
 }

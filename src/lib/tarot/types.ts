@@ -15,6 +15,7 @@ export interface TarotCard {
     reversed: string[];
   };
   archetype: string;
+  imageFile: string;
   summary: {
     upright: string;
     reversed: string;

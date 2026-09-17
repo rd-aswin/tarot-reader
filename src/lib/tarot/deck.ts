@@ -1,3 +1,4 @@
+import { MINOR_ARCANA } from "./minorArcana";
 import { TarotCard, SpreadDefinition } from "./types";
 
 export const MAJOR_ARCANA: TarotCard[] = [
@@ -10,6 +11,7 @@ export const MAJOR_ARCANA: TarotCard[] = [
     suit: null,
     element: "air",
     archetype: "The Leap of Faith & The Holy Innocent",
+    imageFile: "m00.jpg",
     keywords: {
       upright: ["Beginnings", "Innocence", "Spontaneity", "Free Spirit"],
       reversed: ["Recklessness", "Risk-taking", "Hesitation", "Naivety"],
@@ -28,6 +30,7 @@ export const MAJOR_ARCANA: TarotCard[] = [
     suit: null,
     element: "air",
     archetype: "Conscious Will & Manifestation",
+    imageFile: "m01.jpg",
     keywords: {
       upright: ["Willpower", "Desire", "Creation", "Resourcefulness"],
       reversed: ["Illusion", "Scattered Energy", "Wasted Talent", "Manipulation"],
@@ -46,6 +49,7 @@ export const MAJOR_ARCANA: TarotCard[] = [
     suit: null,
     element: "water",
     archetype: "The Subconscious Mirror & Inner Knowing",
+    imageFile: "m02.jpg",
     keywords: {
       upright: ["Intuition", "Sacred Knowledge", "Divine Feminine", "Subconscious"],
       reversed: ["Secrets", "Disconnected Intuition", "Withdrawal", "Surface Level"],
@@ -64,6 +68,7 @@ export const MAJOR_ARCANA: TarotCard[] = [
     suit: null,
     element: "earth",
     archetype: "Abundance, Nurturance & Creative Fertility",
+    imageFile: "m03.jpg",
     keywords: {
       upright: ["Fertility", "Sensuality", "Nurturing", "Abundance"],
       reversed: ["Creative Block", "Depletion", "Overbearing", "Neglect"],
@@ -82,6 +87,7 @@ export const MAJOR_ARCANA: TarotCard[] = [
     suit: null,
     element: "fire",
     archetype: "Structure, Order & Grounded Authority",
+    imageFile: "m04.jpg",
     keywords: {
       upright: ["Stability", "Structure", "Protection", "Sovereignty"],
       reversed: ["Rigidity", "Control Issues", "Chaos", "Inflexibility"],
@@ -100,6 +106,7 @@ export const MAJOR_ARCANA: TarotCard[] = [
     suit: null,
     element: "earth",
     archetype: "Tradition, Spiritual Lineage & Core Values",
+    imageFile: "m05.jpg",
     keywords: {
       upright: ["Wisdom", "Tradition", "Mentorship", "Belief Systems"],
       reversed: ["Rebellion", "Dogma", "Personal Truth", "Unconventional"],
@@ -118,6 +125,7 @@ export const MAJOR_ARCANA: TarotCard[] = [
     suit: null,
     element: "air",
     archetype: "Sacred Union, Moral Choice & Harmony",
+    imageFile: "m06.jpg",
     keywords: {
       upright: ["Alignment", "Values", "Partnership", "Choice"],
       reversed: ["Disharmony", "Misalignment", "Inner Conflict", "Compromise"],
@@ -136,6 +144,7 @@ export const MAJOR_ARCANA: TarotCard[] = [
     suit: null,
     element: "water",
     archetype: "Directed Focus & Tamed Dualities",
+    imageFile: "m07.jpg",
     keywords: {
       upright: ["Determination", "Drive", "Focus", "Victory"],
       reversed: ["Lack of Direction", "Aggression", "Loss of Control", "Burnout"],
@@ -154,6 +163,7 @@ export const MAJOR_ARCANA: TarotCard[] = [
     suit: null,
     element: "fire",
     archetype: "Compassionate Courage & Soft Mastery",
+    imageFile: "m08.jpg",
     keywords: {
       upright: ["Patience", "Compassion", "Inner Fortitude", "Gentle Power"],
       reversed: ["Self-Doubt", "Raw Emotion", "Weakness", "Impatience"],
@@ -172,6 +182,7 @@ export const MAJOR_ARCANA: TarotCard[] = [
     suit: null,
     element: "earth",
     archetype: "Solitude, Contemplation & The Inner Lantern",
+    imageFile: "m09.jpg",
     keywords: {
       upright: ["Introspection", "Solitude", "Soul Searching", "Inner Guidance"],
       reversed: ["Isolation", "Loneliness", "Withdrawal", "Ignoring Truth"],
@@ -190,6 +201,7 @@ export const MAJOR_ARCANA: TarotCard[] = [
     suit: null,
     element: "fire",
     archetype: "Cycles of Change & Cosmic Timing",
+    imageFile: "m10.jpg",
     keywords: {
       upright: ["Cycles", "Destiny", "Turning Point", "Change"],
       reversed: ["Resistance", "Bad Timing", "Disruption", "Clinging"],
@@ -208,6 +220,7 @@ export const MAJOR_ARCANA: TarotCard[] = [
     suit: null,
     element: "air",
     archetype: "Equilibrium, Karma & Unvarnished Truth",
+    imageFile: "m11.jpg",
     keywords: {
       upright: ["Truth", "Fairness", "Accountability", "Cause & Effect"],
       reversed: ["Bias", "Avoidance", "Injustice", "Dishonesty"],
@@ -226,6 +239,7 @@ export const MAJOR_ARCANA: TarotCard[] = [
     suit: null,
     element: "water",
     archetype: "Surrender, New Perspective & Sacred Pause",
+    imageFile: "m12.jpg",
     keywords: {
       upright: ["Surrender", "Pause", "New Perspective", "Letting Go"],
       reversed: ["Stalling", "Resistance", "Martyrdom", "Futile Struggle"],
@@ -244,6 +258,7 @@ export const MAJOR_ARCANA: TarotCard[] = [
     suit: null,
     element: "water",
     archetype: "Profound Metamorphosis & The Pruning Knife",
+    imageFile: "m13.jpg",
     keywords: {
       upright: ["Transformation", "Endings", "Transition", "Rebirth"],
       reversed: ["Clinging to the Past", "Fear of Change", "Decay", "Stagnation"],
@@ -262,6 +277,7 @@ export const MAJOR_ARCANA: TarotCard[] = [
     suit: null,
     element: "fire",
     archetype: "Alchemy, Balance & The Middle Path",
+    imageFile: "m14.jpg",
     keywords: {
       upright: ["Moderation", "Harmony", "Patience", "Alchemy"],
       reversed: ["Imbalance", "Excess", "Impatience", "Extremes"],
@@ -280,6 +296,7 @@ export const MAJOR_ARCANA: TarotCard[] = [
     suit: null,
     element: "earth",
     archetype: "The Shadow, Illusions of Bondage & Material Attachments",
+    imageFile: "m15.jpg",
     keywords: {
       upright: ["Shadow Self", "Attachment", "Addiction", "Self-Imposed Limits"],
       reversed: ["Liberation", "Awareness", "Breaking Free", "Reclaiming Power"],
@@ -298,6 +315,7 @@ export const MAJOR_ARCANA: TarotCard[] = [
     suit: null,
     element: "fire",
     archetype: "Sudden Revelation & The Shattering of False Illusions",
+    imageFile: "m16.jpg",
     keywords: {
       upright: ["Sudden Awakening", "Truth Revelation", "Breakdown", "Liberation"],
       reversed: ["Averting Crisis", "Delayed Truth", "Fear of Disaster", "Clinging"],
@@ -316,6 +334,7 @@ export const MAJOR_ARCANA: TarotCard[] = [
     suit: null,
     element: "air",
     archetype: "Spiritual Renewal, Hope & Cosmic Guidance",
+    imageFile: "m17.jpg",
     keywords: {
       upright: ["Hope", "Faith", "Healing", "Inspiration"],
       reversed: ["Despair", "Discouragement", "Cynicism", "Disconnection"],
@@ -334,6 +353,7 @@ export const MAJOR_ARCANA: TarotCard[] = [
     suit: null,
     element: "water",
     archetype: "The Unconscious Realm, Dreams & Mirage",
+    imageFile: "m18.jpg",
     keywords: {
       upright: ["Illusion", "Subconscious", "Anxiety", "Intuition"],
       reversed: ["Clarity Emergence", "Conquering Fear", "Truth Revealed", "Unraveling"],
@@ -352,6 +372,7 @@ export const MAJOR_ARCANA: TarotCard[] = [
     suit: null,
     element: "fire",
     archetype: "Vitality, Joy & Illuminating Truth",
+    imageFile: "m19.jpg",
     keywords: {
       upright: ["Joy", "Success", "Warmth", "Clarity"],
       reversed: ["Temporary Cloud", "Diminished Joy", "Over-Optimism", "Ego"],
@@ -370,6 +391,7 @@ export const MAJOR_ARCANA: TarotCard[] = [
     suit: null,
     element: "fire",
     archetype: "Soul Awakening, Reckoning & Higher Calling",
+    imageFile: "m20.jpg",
     keywords: {
       upright: ["Awakening", "Reckoning", "Higher Purpose", "Forgiveness"],
       reversed: ["Self-Doubt", "Harsh Self-Criticism", "Hesitation", "Regret"],
@@ -388,6 +410,7 @@ export const MAJOR_ARCANA: TarotCard[] = [
     suit: null,
     element: "earth",
     archetype: "Wholeness, Completion & Integrated Mastery",
+    imageFile: "m21.jpg",
     keywords: {
       upright: ["Completion", "Integration", "Accomplishment", "Wholeness"],
       reversed: ["Incomplete Cycles", "Lack of Closure", "Shortcuts", "Delay"],
@@ -459,4 +482,24 @@ export const SPREADS: SpreadDefinition[] = [
       },
     ],
   },
+  {
+    id: "celtic-cross",
+    name: "The Celtic Cross (10 Cards)",
+    cardCount: 10,
+    description: "The classic, comprehensive 10-card spread providing deep insight into complex, multi-layered situations.",
+    positions: [
+      { id: "cc-1", title: "1. The Heart of the Matter", description: "The present situation or primary focal point of the query." },
+      { id: "cc-2", title: "2. The Crossing / Obstacle", description: "The immediate challenge, opposing force, or what crosses the querent." },
+      { id: "cc-3", title: "3. The Root / Subconscious", description: "The unconscious foundation, underlying motivations, or root cause." },
+      { id: "cc-4", title: "4. The Recent Past", description: "Fading influences or events that have just transpired." },
+      { id: "cc-5", title: "5. The Crown / Conscious", description: "Conscious thoughts, ideals, and what is currently being focused on." },
+      { id: "cc-6", title: "6. The Near Future", description: "Approaching influences and energies about to enter the querent's sphere." },
+      { id: "cc-7", title: "7. The Self", description: "The querent's current attitude, approach, or internal state." },
+      { id: "cc-8", title: "8. The Environment", description: "External influences, other people, or the surrounding atmosphere." },
+      { id: "cc-9", title: "9. Hopes & Fears", description: "The querent's desires, anxieties, or secret expectations." },
+      { id: "cc-10", title: "10. The Outcome", description: "The culminating trajectory or likely resolution based on current momentum." },
+    ],
+  },
 ];
+
+export const FULL_DECK: TarotCard[] = [...MAJOR_ARCANA, ...MINOR_ARCANA];
